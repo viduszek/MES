@@ -4,7 +4,7 @@ import numpy as np
 class Node(object):
     x = float()
     y = float()
-    WB = bool()
+    BC = bool()
 
 
 class Element(object):
@@ -12,46 +12,60 @@ class Element(object):
 
 
 class GlobalData(object):
+    global simTime
+    global simStepTime
+    global conductivity
+    global alpha
+    global tot
+    global initialTemperature
+    global density
+    global specificHeat
+
 
     def getdata(filename):
         with open(filename, 'r') as f:
-            simTime = int(f.readline().split()[-1])
-            simStepTime = int(f.readline().split()[-1])
-            conductivity = int(f.readline().split()[-1])
-            alpha = int(f.readline().split()[-1])
-            tot = int(f.readline().split()[-1])
-            initialTemperature = int(f.readline().split()[-1])
-            density = int(f.readline().split()[-1])
-            specificHeat = int(f.readline().split()[-1])
-            # print(simTime, simStepTime, conductivity, alpha, tot, initialTemperature, density, specificHeat)
+            simTime = f.readline().split()[-1]
+            simStepTime = f.readline().split()[-1]
+            conductivity = f.readline().split()[-1]
+            alpha = f.readline().split()[-1]
+            tot = f.readline().split()[-1]
+            initialTemperature = f.readline().split()[-1]
+            density = f.readline().split()[-1]
+            specificHeat = f.readline().split()[-1]
+            print(simTime, simStepTime, conductivity, alpha, tot, initialTemperature, density, specificHeat)
+            return simTime, simStepTime, conductivity, alpha, tot, initialTemperature, density, specificHeat
 
 
 class Grid(object):
     nodesNumber = int()
     elementsNumber = int()
+    nodes = []
+    elements = []
 
     def getdata(filename):
-        with open(filename, 'r') as f:
-            for i in range(8):          # skip first data sets
+        with open(filename) as f:
+            for i in range(8):          # skip first data sets, which are imported already
                 trash = f.readline()
             nodesNumber = int(f.readline().split()[-1])
             elementsNumber = int(f.readline().split()[-1])
 
             trash = f.readline()
 
-            nodes = []
             for i in range(nodesNumber):
                 temp = f.readline().replace(",", "").strip().split()
-                nodes.append(temp)
-            print(nodes)
+                temp.pop(0)  # removing line number
+                Grid.nodes.append(temp)
+                np.array(Grid.nodes, dtype=float)
+            print(Grid.nodes)
 
             trash = f.readline()
 
-            elements = []
             for i in range(elementsNumber):
                 temp = f.readline().replace(",", "").strip().split()
-                elements.append(temp)
-            # print(elements)
+                temp.pop(0)  # removing line number
+                Grid.elements.append(temp)
+                np.array(Grid.elements, dtype=float)
+            print(Grid.elements)
 
 
 class SC(object):
@@ -75,5 +89,3 @@ filename = "Test1_4_4.txt"
 # Import data from the file.
 GlobalData.getdata(filename)
 Grid.getdata(filename)
-
-#
