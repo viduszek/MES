@@ -135,6 +135,10 @@ def gaussianQuadrature(number, dimension):
     return result
 
 
+def jacobian():
+    pass
+
+
 # =============================== To be solved
 
 def f1(x):
