@@ -113,7 +113,26 @@ def getGridData(input_file):
 
 # =============================== Solving Functions
 
+def gaussianQuadrature(number, dimension):
+    result = 0.0
 
+    if dimension == 1:
+        if number == 2:
+            for i in range(number):
+                result = result + f1(c.intPt2[i]) * c.ptWeight2[i]
+        elif number == 3:
+            for i in range(number):
+                result = result + f1(c.intPt3[i]) * c.ptWeight3[i]
+    elif dimension == 2:
+        if number == 2:
+            for i in range(number):
+                for j in range(number):
+                    result = result + f2(c.intPt2[i], c.intPt2[j]) * c.ptWeight2[i] * c.ptWeight2[j]
+        elif number == 3:
+            for i in range(number):
+                for j in range(number):
+                    result = result + f2(c.intPt3[i], c.intPt3[j]) * c.ptWeight3[i] * c.ptWeight3[j]
+    return result
 
 
 # =============================== To be solved
@@ -128,7 +147,6 @@ def f2(ksi, eta):
 
 def f3(x):
     return 3 * x**2 - 6 * x + 1
-
 
 
 # =============================== Main
@@ -150,4 +168,4 @@ f = Element4()
 getGlobalData(filename)
 getGridData(filename)
 
-
+print(gaussianQuadrature(2, 2))
