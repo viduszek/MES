@@ -168,4 +168,4 @@ f = Element4()
 getGlobalData(filename)
 getGridData(filename)
 
-print(gaussianQuadrature(2, 2))
+print(gaussianQuadrature(3,  1))
