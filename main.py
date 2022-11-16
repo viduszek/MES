@@ -1,10 +1,8 @@
 # =============================== Libraries/Packages
 import numpy as np
-import scipy as sp
+
 
 # =============================== Classes
-
-
 class Node:
     x = float()
     y = float()
@@ -108,11 +106,20 @@ def getGridData(input_file):
             Grid.elements.append(temp)
         print(Grid.elements)
 
-        return Grid.nodes, Grid.elements
+        f.readline()
+
+        temp = f.readline().replace(",", "").strip().split()
+        temp = [int(temp) for temp in temp]
+        Node.BC = [False for i in range(nodesNumber)]
+
+        for i in range(len(temp)):
+            num = temp[i]
+            Node.BC[num-1] = True
+
+        return Grid.nodes, Grid.elements, Node.BC
 
 
 # =============================== Solving Functions
-
 def gaussianQuadrature(number, dimension):
     result = 0.0
 
@@ -140,7 +147,6 @@ def jacobian():
 
 
 # =============================== To be solved
-
 def f1(x):
     return 2 * x**2 + 3 * x - 8
 
@@ -154,7 +160,6 @@ def f3(x):
 
 
 # =============================== Main
-
 # Choose input file.
 filename = "Test1_4_4.txt"
 # filename = "Test2_4_4_MixGrid.txt"
