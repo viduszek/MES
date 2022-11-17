@@ -8,16 +8,10 @@ class Node:
     y = float()
     BC = bool()
 
-    def __init__(self):
-        print("class: Node initialized.")
-
 
 class Element:
     ID = []  # up to 4!
     # ID = [4]
-
-    def __init__(self):
-        print("class: Element initialized.")
 
 
 class GlobalData:  # there's actually no need to declare those variables, but you can do it tho
@@ -30,8 +24,8 @@ class GlobalData:  # there's actually no need to declare those variables, but yo
     density = int()
     specificHeat = int()
 
-    def __init__(self):
-        print("class: GlobalData initialized.")
+    # def __init__(self):
+        # print("class: GlobalData initialized.")
 
 
 class Grid:
@@ -40,27 +34,27 @@ class Grid:
     nodes = []
     elements = []
 
-    def __init__(self):
-        print("class: Grid initialized.")
+    # def __init__(self):
+        # print("class: Grid initialized.")
 
 
-class SC(object):
-    intPt2 = [-1 / np.sqrt(3), 1 / np.sqrt(3)]  # integral points
-    ptWeight2 = [1, 1]
+class SC:
+    intPt2 = [-1 / np.sqrt(3), 1 / np.sqrt(3)]  # for n = 2
+    ptWeight2 = [1, 1]                          # weights
 
-    intPt3 = [-np.sqrt(0.6), 0, np.sqrt(0.6)]  # integral points (#3)
-    ptWeight3 = [0.555555, 0.888888, 0.555555]
+    intPt3 = [-np.sqrt(3/5), 0, np.sqrt(3/5)]  # points for n = 3
+    ptWeight3 = [5.0/9.0, 8.0/9.0, 5.0/9.0]    # weights
 
-    def __init__(self):
-        print("class: SC initialized.")
+    # def __init__(self):
+        # print("class: SC initialized.")
 
 
-class Element4(object):
-    ksi = []
-    eta = []
+class El4:
+    ksi = [[]]
+    eta = [[]]
 
-    def __init__(self):
-        print("class: Element4 initizalized")
+    def fillKsi(self, number):
+        pass
 
 
 # =============================== Input Functions
@@ -75,8 +69,8 @@ def getGlobalData(input_file):
         GlobalData.density = int(f.readline().split()[-1])
         GlobalData.specificHeat = int(f.readline().split()[-1])
 
-    print(GlobalData.simTime, GlobalData.simStepTime, GlobalData.conductivity, GlobalData.alpha,
-          GlobalData.tot, GlobalData.initialTemp, GlobalData.density, GlobalData.specificHeat)
+    # print(GlobalData.simTime, GlobalData.simStepTime, GlobalData.conductivity, GlobalData.alpha,
+    #      GlobalData.tot, GlobalData.initialTemp, GlobalData.density, GlobalData.specificHeat)  # control print
     return GlobalData.simTime, GlobalData.simStepTime, GlobalData.conductivity, GlobalData.alpha, \
         GlobalData.tot, GlobalData.initialTemp, GlobalData.density, GlobalData.specificHeat
 
@@ -95,7 +89,7 @@ def getGridData(input_file):
             temp.pop(0)  # removing line number
             temp = [float(temp) for temp in temp]  # let's make them float
             Grid.nodes.append(temp)
-        print(Grid.nodes)
+        # print(Grid.nodes)  # control print
 
         f.readline()
 
@@ -104,7 +98,7 @@ def getGridData(input_file):
             temp.pop(0)
             temp = [float(temp) for temp in temp]
             Grid.elements.append(temp)
-        print(Grid.elements)
+        # print(Grid.elements)  # control print
 
         f.readline()
 
@@ -115,6 +109,8 @@ def getGridData(input_file):
         for i in range(len(temp)):
             num = temp[i]
             Node.BC[num-1] = True
+
+        # print(Node.BC)  # control print
 
         return Grid.nodes, Grid.elements, Node.BC
 
@@ -142,11 +138,36 @@ def gaussianQuadrature(number, dimension):
     return result
 
 
-def jacobian():
-    pass
+def N1(x):
+    return (1-x)/2
+
+
+def N2(x):
+    return (1+x)/2
+
+
+def integral(number, x1, x2):
+    result = 0
+
+    detJ = (x2 - x1) / 2
+
+    PC = [(N1(SC.intPt2[0])*x1+N2(SC.intPt2[0])*x2), (N1(SC.intPt2[1])*x1+N2(SC.intPt2[1])*x2)]
+
+    if number == 2:
+        for i in range(number):
+            result = result + f(PC[i]) * SC.ptWeight2[i]
+    # elif number == 3:
+    #    for i in range(number):
+    #        result = result + f(PC[i]) * SC.ptWeight3[i]
+
+    return result * detJ
 
 
 # =============================== To be solved
+def f(x):
+    return x + 2
+
+
 def f1(x):
     return 2 * x**2 + 3 * x - 8
 
@@ -161,9 +182,25 @@ def f3(x):
 
 # =============================== Main
 # Choose input file.
-filename = "Test1_4_4.txt"
-# filename = "Test2_4_4_MixGrid.txt"
-# filename = "Test3_31_31_kwadrat.txt"
+
+inFile = '1'
+
+# inFile = input("""Choose input file
+#            1. Test1_4_4
+#            2. Test2_4_4_MixGrid
+#            3. Test3_31_31_kwadrat
+# File index: """)
+
+if inFile == '1':
+    filename = "Test1_4_4.txt"
+elif inFile == '2':
+    filename = "Test2_4_4_MixGrid.txt"
+elif inFile == '3':
+    filename = "Test3_31_31_kwadrat.txt"
+else:
+    print("Error.")
+    filename = ""
+    exit()
 
 # Class initialization
 a = GlobalData()
@@ -171,10 +208,12 @@ b = Grid()
 c = SC()
 d = Node()
 e = Element()
-f = Element4()
+# f = El4()
 
 # Import data from the file.
 getGlobalData(filename)
 getGridData(filename)
 
-print(gaussianQuadrature(3,  1))
+# Call functions
+print("Kwadratura Gaussa: \t", gaussianQuadrature(3,  1))   # number, dimension
+print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
