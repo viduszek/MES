@@ -149,7 +149,7 @@ def N2(x):
 def integral(number, x1, x2):
     result = 0
 
-    detJ = (x2 - x1) / 2
+    detJ = (x2 - x1)/2
 
     PC = [(N1(SC.intPt2[0])*x1+N2(SC.intPt2[0])*x2), (N1(SC.intPt2[1])*x1+N2(SC.intPt2[1])*x2)]
 
