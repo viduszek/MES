@@ -50,11 +50,16 @@ class SC:
 
 
 class El4:
-    ksi = [[]]
-    eta = [[]]
+    ksi = []
+    eta = []
 
-    def fillKsi(self, number):
-        pass
+    def fill(self, number):
+        for i in range(4):
+            El4.ksi.append([])
+            El4.eta.append([])
+            for j in range(4):
+                El4.ksi[i].append(Nksi(j, SC.intPt2[i % number]))
+                El4.eta[i].append(Neta(j, SC.intPt2[i % number]))
 
 
 # =============================== Input Functions
@@ -163,6 +168,28 @@ def integral(number, x1, x2):
     return result * detJ
 
 
+def Nksi(number, x):
+    if number == 1:
+        return -0.25 * (1-x)
+    if number == 2:
+        return 0.25 * (1-x)
+    if number == 3:
+        return 0.25 * (1+x)
+    if number == 4:
+        return -0.25 * (1+x)
+
+
+def Neta(number, x):
+    if number == 1:
+        return -0.25 * (1-x)
+    if number == 2:
+        return -0.25 * (1+x)
+    if number == 3:
+        return 0.25 * (1+x)
+    if number == 4:
+        return 0.25 * (1-x)
+
+
 # =============================== To be solved
 def f(x):
     return x + 2
@@ -208,7 +235,7 @@ b = Grid()
 c = SC()
 d = Node()
 e = Element()
-# f = El4()
+g = El4()
 
 # Import data from the file.
 getGlobalData(filename)
@@ -217,3 +244,6 @@ getGridData(filename)
 # Call functions
 print("Kwadratura Gaussa: \t", gaussianQuadrature(3,  1))   # number, dimension
 print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
+g.fill(2)                                                   # number
+print(El4.ksi, "\n", El4.eta)
+
