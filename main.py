@@ -53,13 +53,19 @@ class El4:
     ksi = []
     eta = []
 
-    def fill(self, number):
-        for i in range(4):
-            El4.ksi.append([])
-            El4.eta.append([])
-            for j in range(4):
-                El4.ksi[i].append(Nksi(j, SC.intPt2[i % number]))
-                El4.eta[i].append(Neta(j, SC.intPt2[i % number]))
+    @staticmethod
+    def fill(number):
+        if number == 2:
+            for i in range(number**2):
+                El4.ksi.append([])
+                El4.eta.append([])
+                for j in range(4):
+                    El4.ksi[i].append(Nksi(j, -SC.intPt2[i % number]))
+                    El4.eta[i].append(Neta(j, SC.intPt2[i % number]))
+        elif number == 3:
+            print("tu jeszcze nic nie ma.")
+        elif number == 4:
+            print("tu tez jeszcze nic nie ma")
 
 
 # =============================== Input Functions
@@ -169,24 +175,25 @@ def integral(number, x1, x2):
 
 
 def Nksi(number, x):
+    if number == 0:
+        return 0.25 * (x-1)
     if number == 1:
-        return -0.25 * (1-x)
+        return -0.25 * (x-1)
     if number == 2:
-        return 0.25 * (1-x)
+        return 0.25 * (x+1)
     if number == 3:
-        return 0.25 * (1+x)
-    if number == 4:
-        return -0.25 * (1+x)
+        return -0.25 * (x+1)
+# 0.25(1-k)(1-n), 0.25(1+k)(1-n), 0.25(1+k)(1+n), 0.25(1-k)(1+n)
 
 
 def Neta(number, x):
-    if number == 1:
+    if number == 0:
         return -0.25 * (1-x)
-    if number == 2:
+    if number == 1:
         return -0.25 * (1+x)
-    if number == 3:
+    if number == 2:
         return 0.25 * (1+x)
-    if number == 4:
+    if number == 3:
         return 0.25 * (1-x)
 
 
@@ -244,6 +251,7 @@ getGridData(filename)
 # Call functions
 print("Kwadratura Gaussa: \t", gaussianQuadrature(3,  1))   # number, dimension
 print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
-g.fill(2)                                                   # number
-print(El4.ksi, "\n", El4.eta)
+g.fill(2)                                                   # number # fills ksi and eta arrays
 
+print(np.matrix(El4.ksi), "\n\n", np.matrix(El4.eta))
+print(1%2)
