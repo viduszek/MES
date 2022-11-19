@@ -60,7 +60,7 @@ class El4:
                 El4.ksi.append([])
                 El4.eta.append([])
                 for j in range(4):
-                    El4.ksi[i].append(Nksi(j, -SC.intPt2[i % number]))
+                    El4.ksi[i].append(Nksi(j, SC.intPt2[i % number]))
                     El4.eta[i].append(Neta(j, SC.intPt2[i % number]))
         elif number == 3:
             print("tu jeszcze nic nie ma.")
@@ -254,4 +254,3 @@ print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
 g.fill(2)                                                   # number # fills ksi and eta arrays
 
 print(np.matrix(El4.ksi), "\n\n", np.matrix(El4.eta))
-print(1%2)
