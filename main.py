@@ -259,7 +259,7 @@ g = El4()
 getGlobalData(filename)
 getGridData(filename)
 
-# Printing (tests; we call functions here)
+# Printing (tests, we call functions here)
 print("Kwadratura Gaussa: \t", gaussianQuadrature(3,  1))   # number, dimension
 print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
 g.fill(2)                                                   # number # fills ksi and eta arrays
