@@ -45,13 +45,24 @@ class SC:
     intPt3 = [-np.sqrt(3/5), 0, np.sqrt(3/5)]  # points for n = 3
     ptWeight3 = [5.0/9.0, 8.0/9.0, 5.0/9.0]    # weights
 
+    intPt4 = []
+    ptWeight4 = []
+
     # def __init__(self):
         # print("class: SC initialized.")
 
 
 class El4:
-    ksi = []
+    ksi = [] 
     eta = []
+
+    ksi2 = [1, -1, -1, 1]  # additional weights for the integral points / ksi version
+    # ksi3 = []
+    # ksi4 = []
+
+    eta2 = [1, 1, 1, 1]  # additional weights for the integral points / eta version
+    # eta3 = []
+    # eta4 = []
 
     @staticmethod
     def fill(number):
@@ -60,12 +71,12 @@ class El4:
                 El4.ksi.append([])
                 El4.eta.append([])
                 for j in range(4):
-                    El4.ksi[i].append(Nksi(j, SC.intPt2[i % number]))
-                    El4.eta[i].append(Neta(j, SC.intPt2[i % number]))
-        elif number == 3:
-            print("tu jeszcze nic nie ma.")
-        elif number == 4:
-            print("tu tez jeszcze nic nie ma")
+                    El4.ksi[i].append(Nksi(j, SC.intPt2[i % number] * El4.ksi2[i]))
+                    El4.eta[i].append(Neta(j, SC.intPt2[i % number] * El4.eta2[i]))
+        # elif number == 3:
+        #     print("tu jeszcze nic nie ma.")
+        # elif number == 4:
+        #     print("tu tez jeszcze nic nie ma")
 
 
 # =============================== Input Functions
@@ -248,7 +259,7 @@ g = El4()
 getGlobalData(filename)
 getGridData(filename)
 
-# Call functions
+# Printing (tests; we call functions here)
 print("Kwadratura Gaussa: \t", gaussianQuadrature(3,  1))   # number, dimension
 print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
 g.fill(2)                                                   # number # fills ksi and eta arrays
