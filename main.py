@@ -220,6 +220,9 @@ def H(number):
 
     print(np.array(matH))
 
+def agregrate():
+    pass
+
 
 # =============================== Input Functions
 def getGlobalData(input_file):
