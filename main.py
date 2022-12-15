@@ -10,10 +10,17 @@ class Node:
     y = float()
     BC = bool()
 
+    def __init__(self, x, y):
+        self.x = x;
+        self.y = y;
+
 
 class Element:
     ID = []  # up to 4!
     # ID = [4]
+
+    def __init__(self, ID):
+        self.ID = ID
 
 
 class GlobalData:  # there's actually no need to declare those variables, but you can do it tho
@@ -44,7 +51,7 @@ class SC:
     intPt2 = [-1 / np.sqrt(3), 1 / np.sqrt(3)]  # for n = 2
     ptWeight2 = [1, 1]  # weights
 
-    intPt3 = [-np.sqrt(3 / 5), 0, np.sqrt(3 / 5)]  # points for n = 3
+    intPt3 = [np.sqrt(3 / 5), np.sqrt(3 / 5), np.sqrt(3 / 5)]  # points for n = 3
     ptWeight3 = [5.0 / 9.0, 8.0 / 9.0, 5.0 / 9.0]  # weights
 
     intPt4 = [-np.sqrt((3 / 7) + (2 / 7) * np.sqrt(6 / 5)), -np.sqrt((3 / 7) - (2 / 7) * np.sqrt(6 / 5)),
@@ -60,11 +67,11 @@ class El4:
     eta = []
 
     ksi2 = [1, -1, -1, 1]  # additional weights for the integral points / ksi version
-    ksi3 = [1, -1, -1, 1, 1, -1, -1, 1, 1]
+    ksi3 = [-1, -1, -1, 0, 0, 0, 1, 1, 1]
     ksi4 = [1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1]
 
     eta2 = [1, 1, 1, 1]  # additional weights for the integral points / eta version
-    eta3 = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    eta3 = [-1, 0, 1, -1, 0, 1, -1, 0, 1]
     eta4 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     @staticmethod
@@ -83,6 +90,8 @@ class El4:
                 for j in range(4):
                     El4.ksi[i].append(Nksi(j, SC.intPt3[i % number] * El4.ksi3[i]))
                     El4.eta[i].append(Neta(j, SC.intPt3[i % number] * El4.eta3[i]))
+            # print(np.array(El4.ksi))
+            # print(np.array(El4.eta))
         elif number == 4:
             for i in range(number ** 2):
                 El4.ksi.append([])
@@ -102,13 +111,28 @@ class MatrixH:
     matJacobian = []
     nx = []
     ny = []
+    GH = []
 
-    coordinates = [[0, 0], [0.025, 0], [0.025, 0.025], [0, 0.025]]
+    # coordinates = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
+    coordinates = [[0.0, 0.0], [0.025, 0.0], [0.025, 0.025], [0.0, 0.025]]
 
 
 def createMatrix(number):  #
     matrix = []
     if number == 2:
+        for i in range(number ** 2):
+            xksi, xeta, yksi, yeta = 0.0, 0.0, 0.0, 0.0
+            for j in range(4):
+                xksi = xksi + (El4.ksi[i][j] * MatrixH.coordinates[j][0])
+                xeta = xeta + (El4.eta[i][j] * MatrixH.coordinates[j][0])
+                yksi = yksi + (El4.ksi[i][j] * MatrixH.coordinates[j][1])
+                yeta = yeta + (El4.eta[i][j] * MatrixH.coordinates[j][1])
+            MatrixH.dxdksi.append(xksi)
+            MatrixH.dxdeta.append(xeta)
+            MatrixH.dydksi.append(yksi)
+            MatrixH.dydeta.append(yeta)
+        matrix = list(zip(MatrixH.dxdksi, MatrixH.dxdeta, MatrixH.dydksi, MatrixH.dydeta))
+    elif number == 3:
         for i in range(number ** 2):
             xksi, xeta, yksi, yeta = 0.0, 0.0, 0.0, 0.0
             for j in range(4):
@@ -132,7 +156,11 @@ def jacobian(number):
             temp = (MatrixH.dxdksi[i] * MatrixH.dydeta[i]) - (MatrixH.dxdeta[i] * MatrixH.dydksi[i])
             MatrixH.revJacobian.append(1 / temp)
             MatrixH.matJacobian.append(temp)
-    # print(MatrixH.matJacobian)
+    elif number == 3:
+        for i in range(number ** 2):
+            temp = (MatrixH.dxdksi[i] * MatrixH.dydeta[i]) - (MatrixH.dxdeta[i] * MatrixH.dydksi[i])
+            MatrixH.revJacobian.append(1 / temp)
+            MatrixH.matJacobian.append(temp)
     # print(MatrixH.revJacobian)
     return MatrixH.revJacobian, MatrixH.matJacobian
 
@@ -140,18 +168,17 @@ def jacobian(number):
 def translate(number):  # 80 0 0 80
     xksi, xeta, yksi, yeta = 0.0, 0.0, 0.0, 0.0
     tr = []
-    if number == 2:
-        for i in range(number**2):
-            tr.append([])
-            for j in range(4):
-                xksi = xksi + (El4.ksi[i][j] * MatrixH.coordinates[j][0])
-                xeta = xeta + (El4.eta[i][j] * MatrixH.coordinates[j][0])
-                yksi = yksi + (El4.ksi[i][j] * MatrixH.coordinates[j][1])
-                yeta = yeta + (El4.eta[i][j] * MatrixH.coordinates[j][1])
-            tr[i].append(xksi * MatrixH.revJacobian[i])
-            tr[i].append(xeta * MatrixH.revJacobian[i])
-            tr[i].append(yksi * MatrixH.revJacobian[i])
-            tr[i].append(yeta * MatrixH.revJacobian[i])
+    for i in range(number**2):
+        tr.append([])
+        for j in range(4):
+            xksi = xksi + (El4.ksi[i][j] * MatrixH.coordinates[j][0])
+            xeta = xeta + (El4.eta[i][j] * MatrixH.coordinates[j][0])
+            yksi = yksi + (El4.ksi[i][j] * MatrixH.coordinates[j][1])
+            yeta = yeta + (El4.eta[i][j] * MatrixH.coordinates[j][1])
+        tr[i].append(xksi * MatrixH.revJacobian[i])
+        tr[i].append(xeta * MatrixH.revJacobian[i])
+        tr[i].append(yksi * MatrixH.revJacobian[i])
+        tr[i].append(yeta * MatrixH.revJacobian[i])
 
     # print(tr)
     return tr
@@ -165,64 +192,81 @@ def transform(number):  # dla punktow calkowania dndx, dndy
             for j in range(4):
                 MatrixH.nx[i].append(translate(2)[0][0] * El4.ksi[i][j] + translate(2)[0][1] * El4.eta[i][j])
                 MatrixH.ny[i].append(translate(2)[0][2] * El4.ksi[i][j] + translate(2)[0][3] * El4.eta[i][j])
+    if number == 3:
+        for i in range(number**2):
+            MatrixH.nx.append([])
+            MatrixH.ny.append([])
+            for j in range(4):
+                MatrixH.nx[i].append(translate(3)[0][0] * El4.ksi[i][j] + translate(3)[0][1] * El4.eta[i][j])
+                MatrixH.ny[i].append(translate(3)[0][2] * El4.ksi[i][j] + translate(3)[0][3] * El4.eta[i][j])
 
-    # print(np.array(MatrixH.nx), "\n\n", np.array(MatrixH.ny))
+
+    # print(MatrixH.nx), "\n\n", np.array(MatrixH.ny))
+    # print(np.array(MatrixH.nx))
     return MatrixH.nx, MatrixH.ny
 
 
 def calcMatrixH(kt, number):  # calka kt((nx*nx-1)+(ny*ny-1))
     tempArr = []
-    for k in range(number**2):
-        tempArr.append([])
-        for i in range(number**2):
-            # tempArr.append([])
-            for j in range(4):
-                temp = (MatrixH.nx[k][j] * MatrixH.nx[k][i] + MatrixH.ny[k][j] * MatrixH.ny[k][i]) * \
-                       MatrixH.matJacobian[i]
-                temp = temp * kt
-                tempArr[k].append(temp)
-
+    temp2 = 0
+    # print(np.array(MatrixH.nx), "\n\n", np.array(MatrixH.ny))
+    if number == 2:
+        for k in range(number**2):
+            tempArr.append([])
+            for i in range(number**2):
+                # tempArr.append([])
+                for j in range(4):
+                    temp = (MatrixH.nx[k][j] * MatrixH.nx[k][i] + MatrixH.ny[k][j] * MatrixH.ny[k][i]) * \
+                           MatrixH.matJacobian[i]
+                    temp = temp * kt
+                    tempArr[k].append(temp)
     # MatrixH.H.insert(-1, tempArr)
     # print(np.array(tempArr))
     # print(np.array(MatrixH.H))
+        for i in range(number ** 2):
+            tempArr2 = np.array(tempArr[i]).reshape(4, 4)
+            MatrixH.H.append(tempArr2)
+    elif number == 3:
+        for k in range(number**2):
+            tempArr.append([])
+            for i in range(4):
+                for j in range(4):
+                    temp = (MatrixH.nx[k][j] * MatrixH.nx[k][i] + MatrixH.ny[k][j] * MatrixH.ny[k][i]) * \
+                           MatrixH.matJacobian[k]
+                    temp = temp * kt
+                    tempArr[k].append(temp)
+        for i in range(number ** 2):
+            tempArr2 = np.array(tempArr[i]).reshape(4, 4)
+            MatrixH.H.append(tempArr2)
 
-    for i in range(number ** 2):
-        tempArr2 = np.array(tempArr[i]).reshape(4, 4)
-        MatrixH.H.append(tempArr2)
-
-    print(np.array(MatrixH.H))
+    # print(np.array(MatrixH.H))
     return MatrixH.H
 
 
 def H(number):
     matH = []
+    tempp = 0
     if number == 2:
-        for j in range(number**2):
+        for j in range(4):
             temp = 0
-            for k in range(4):
-                temp = temp + MatrixH.H[k][j] * SC.ptWeight2[k % 2]
+            for k in range(number**2):
+                temp = temp + MatrixH.H[k][j] * SC.ptWeight2[k % 2] * SC.ptWeight2[k % 2]
             # print(temp)
             matH.append(temp)
     elif number == 3:
-        for j in range(number**2):
+        for j in range(4):
             temp = 0
-            for k in range(4):
-                temp = temp + MatrixH.H[k][j] * SC.ptWeight3[k % 3]
+            for k in range(number**2):
+                # print(MatrixH.H)
+                if k > 2:
+                    tempp = 1
+                if k > 5:
+                    tempp = 2
+                temp = temp + MatrixH.H[k][j] * SC.ptWeight3[tempp] * SC.ptWeight3[k % 3]
             # print(temp)
             matH.append(temp)
-    elif number == 4:
-        for j in range(number**2):
-            temp = 0
-            for k in range(4):
-                temp = temp + MatrixH.H[k][j] * SC.ptWeight4[k % 4]
-            # print(temp)
-            matH.append(temp)
-
     print(np.array(matH))
-
-def agregrate():
-    pass
-
+    return matH
 
 # =============================== Input Functions
 def getGlobalData(input_file):
@@ -246,32 +290,32 @@ def getGridData(input_file):
     with open(input_file) as f:
         for i in range(8):  # skip first data sets, which are imported already
             f.readline()
-        nodesNumber = int(f.readline().split()[-1])
-        elementsNumber = int(f.readline().split()[-1])
+        Grid.nodesNumber = int(f.readline().split()[-1])
+        Grid.elementsNumber = int(f.readline().split()[-1])
 
         f.readline()
 
-        for i in range(nodesNumber):
+        for i in range(Grid.nodesNumber):
             temp = f.readline().replace(",", "").strip().split()
             temp.pop(0)  # removing line number
             temp = [float(temp) for temp in temp]  # let's float them
-            Grid.nodes.append(temp)
-        # print(Grid.nodes)  # control print
+            Grid.nodes.append(Node(temp[0], temp[1]))
+        # print(Grid.nodes[0].x)  # control print
 
         f.readline()
 
-        for i in range(elementsNumber):
+        for i in range(Grid.elementsNumber):
             temp = f.readline().replace(",", "").strip().split()
             temp.pop(0)
             temp = [float(temp) for temp in temp]
-            Grid.elements.append(temp)
-        # print(Grid.elements)  # control print
+            Grid.elements.append(Element(temp))
+        # print(Grid.elements[0].ID[2])  # control print
 
         f.readline()
 
         temp = f.readline().replace(",", "").strip().split()
         temp = [int(temp) for temp in temp]
-        Node.BC = [False for i in range(nodesNumber)]
+        Node.BC = [False for i in range(Grid.nodesNumber)]
 
         for i in range(len(temp)):
             num = temp[i]
@@ -369,6 +413,35 @@ def f3(x):
     return 3 * x ** 2 - 6 * x + 1
 
 
+def mes(number):
+    for i in range(Grid.nodesNumber):
+        MatrixH.GH.append([])
+        for j in range(Grid.nodesNumber):
+            MatrixH.GH[i].append(0)
+
+    for i in range(Grid.elementsNumber):
+        for j in range(4):
+            temp = int(Grid.elements[i].ID[j]) - 1
+            MatrixH.coordinates[j][0] = Grid.nodes[temp].x
+            MatrixH.coordinates[j][1] = Grid.nodes[temp].y
+        # print(MatrixH.coordinates)
+
+        g.fill(number)  # number # fills ksi and eta arrays
+        createMatrix(number)
+        jacobian(number)
+        translate(number)
+        transform(number)
+        calcMatrixH(GlobalData.conductivity, number)
+        temp = H(number)
+
+        for j in range(4):
+            for k in range(4):
+                MatrixH.GH[int(Grid.elements[i].ID[j]) - 1][int(Grid.elements[i].ID[k]) - 1] += temp[j][k]
+
+    print(np.array(MatrixH.GH))
+
+
+
 # =============================== Main
 # Choose input file.
 
@@ -395,8 +468,8 @@ else:
 a = GlobalData()
 b = Grid()
 c = SC()
-d = Node()
-e = Element()
+# d = Node()
+# e = Element()
 g = El4()
 h = MatrixH()
 
@@ -407,13 +480,13 @@ getGridData(filename)
 # Printing (tests, we call functions here)
 # print("Kwadratura Gaussa: \t", gaussianQuadrature(3,  1))   # number, dimension
 # print("Calka: \t\t\t\t", integral(2, 4, 12))                # number, x1, x2
-g.fill(2)  # number # fills ksi and eta arrays
-createMatrix(2)
-jacobian(2)
-translate(2)
-transform(2)
-calcMatrixH(30, 2)
-H(2)
-
+# g.fill(2)  # number # fills ksi and eta arrays
+# createMatrix(2)
+# jacobian(2)
+# translate(2)
+# transform(2)
+# calcMatrixH(30, 2)
+# H(2)
+mes(3)
 
 # print(np.matrix(g.ksi), "\n\n", np.matrix(g.eta))
